@@ -44,6 +44,14 @@ For example, other rights such as publicity, privacy, or moral rights may limit 
 #define H4_Q_CAPACITY	 10 // Default Q capacity
 #define H4_Q_ABS_MIN      6 // Absolute minimum Q capacity
 
+#define H4_DEBUG          0
+
+#if H4_DEBUG
+#define H4_Pirntf(f_, ...)    Serial.printf((f_), ##__VA_ARGS__)
+#else
+#define H4_Pirntf(f_, ...)
+#endif
+
 enum {
     H4_CHUNKER_ID=90,
     H4AT_SCAVENGER_ID,
@@ -140,7 +148,7 @@ class task{
 			bool 			_s=false
 			);
 
-        ~task(){ }//Serial.printf("T=%u TASK DTOR %p\n",millis(),this); }
+        ~task(){ }//H4_Pirntf("T=%u TASK DTOR %p\n",millis(),this); }
 
 		static	void 		cancelSingleton(uint32_t id);
 				uint32_t 	cleardown(uint32_t t);
@@ -176,7 +184,7 @@ class H4: public std::priority_queue<task*, std::vector<task*>, task>{ // H4P 35
                     reserve(qSize);
                     if(baud) { 
                         Serial.begin(baud);
-                        Serial.printf("\nH4 RUNNING %s\n",H4_VERSION);
+                        H4_Pirntf("\nH4 RUNNING %s\n",H4_VERSION);
                     }
                 }
 

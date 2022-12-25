@@ -62,7 +62,7 @@ uint32_t h4Nloops=0;
 #endif
 
 #if H4_HOOK_TASKS
-    H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ Serial.printf("%s\n",dumpTask(t,faze).data());  };
+    H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ H4_Pirntf("%s\n",dumpTask(t,faze).data());  };
 //    H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ };
 
     H4_INT_MAP taskTypes={
@@ -87,7 +87,7 @@ std::string H4::getTaskType(uint32_t e){ return taskTypes.count(e) ? taskTypes[e
 const char* H4::getTaskName(uint32_t id){ return h4TaskNames.count(id) ? h4TaskNames[id].data():"ANON"; }
 
 std::string H4::dumpTask(task* t,uint32_t faze){
-//    Serial.printf("H4::dumpTask 0x%08x Phase %d\n",t,faze);
+//    H4_Pirntf("H4::dumpTask 0x%08x Phase %d\n",t,faze);
     char buf[1024];
     snprintf(buf,1023,"T=%08u %s: Q=%02d 0x%08x %s/%s %s %10u(T%+10d) %10u %10u %10u L=%d",
         millis(),
@@ -112,12 +112,12 @@ std::string H4::dumpTask(task* t,uint32_t faze){
 
 void H4::dumpQ(){
     if(h4.size()){
-	    Serial.printf("           ACT   nQ    Handle   Type/name    Due @tick(T+         )        Min        Max        nRQ Len\n"); 
+	    H4_Pirntf("           ACT   nQ    Handle   Type/name    Due @tick(T+         )        Min        Max        nRQ Len\n"); 
         std::vector<task*> tlist=h4._copyQ();
         std::sort(tlist.begin(),tlist.end(),[](const task* a, const task* b){ return a->at < b->at; });
-        for(auto const& t:tlist) Serial.printf("%s\n",dumpTask(t,0).data()); // faze=quiescent
-        Serial.printf("\n");
-    } else Serial.printf("QUEUE EMPTY\n");
+        for(auto const& t:tlist) H4_Pirntf("%s\n",dumpTask(t,0).data()); // faze=quiescent
+        H4_Pirntf("\n");
+    } else H4_Pirntf("QUEUE EMPTY\n");
 }
 #else
 void H4::dumpQ(){}
@@ -193,14 +193,14 @@ void task::_destruct(){
 }
 //		The many ways to die... :)
 uint32_t task::endF(){
-//    Serial.printf("ENDF %p\n",this);
+//    H4_Pirntf("ENDF %p\n",this);
 	reaper=H4Countdown(1);
 	at=0;
 	return cleardown(1+nrq);
 }
 
 uint32_t task::endU(){
-//    Serial.printf("ENDU %p\n",this);
+//    H4_Pirntf("ENDU %p\n",this);
 	_chain();
 	return nrq+endK();
 }
@@ -212,7 +212,7 @@ uint32_t task::endC(H4_FN_TIF f){
 }
 
 uint32_t task::endK(){
-//    Serial.printf("ENDK %p\n",this);
+//    H4_Pirntf("ENDK %p\n",this);
 	harakiri=true;
 	return cleardown(at=0);
 }
@@ -359,9 +359,9 @@ void H4::loop(){
 	HAL_enableInterrupts();
 	if(t){ // H4P 35000 35100
         H4::context=t;
-//        Serial.printf("T=%u H4context <-- %p\n",millis(),t);
+//        H4_Pirntf("T=%u H4context <-- %p\n",millis(),t);
         (*t)();
-//        Serial.printf("T=%u H4context --> %p\n",millis(),t);
+//        H4_Pirntf("T=%u H4context --> %p\n",millis(),t);
 //        dumpQ();
     };
 //
