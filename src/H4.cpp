@@ -89,30 +89,30 @@ const char* H4::getTaskName(uint32_t id){ return h4TaskNames.count(id) ? h4TaskN
 std::string H4::dumpTask(task* t,uint32_t faze){
 //    H4_Pirntf("H4::dumpTask 0x%08x Phase %d\n",t,faze);
     char buf[1024];
-    snprintf(buf,1023,"T=%08u %s: Q=%02d 0x%08x %s/%s %s %10u(T%+10d) %10u %10u %10u L=%d",
-        millis(),
-        taskPhase[faze],
-        h4.size(),
-        (void*) t,
-//        (void*) t->parent,
-        getTaskType(t->uid/100).data(),
-        getTaskName(t->uid%100),
-        t->singleton ? "S":" ",
-        t->at,
-        (int)((int) (int) t->at - millis()),
-        t->rmin,
-        t->rmax,
-        t->nrq,
-        t->len
-//        t->userStore.size()
-        );
+    snprintf(buf, 1023, "T=%08u %s: Q=%02d 0x%08x %s/%s %s %10llu(T%+11llu) %10u %10u %10u L=%d",
+             millis(),
+             taskPhase[faze],
+             h4.size(),
+             (void *)t,
+             //        (void*) t->parent,
+             getTaskType(t->uid / 100).data(),
+             getTaskName(t->uid % 100),
+             t->singleton ? "S" : " ",
+             t->at,
+             t->at > millis() ? (uint64_t)((uint64_t)t->at - millis()) : (uint64_t)(millis() - t->at),
+             t->rmin,
+             t->rmax,
+             t->nrq,
+             t->len
+             //        t->userStore.size()
+    );
 
     return std::string(buf);
 }
 
 void H4::dumpQ(){
     if(h4.size()){
-	    H4_Pirntf("           ACT   nQ    Handle   Type/name    Due @tick(T+         )        Min        Max        nRQ Len\n"); 
+	    H4_Pirntf("           ACT   nQ    Handle   Type/name    Due @tick(T+          )        Min        Max        nRQ Len\n"); 
         std::vector<task*> tlist=h4._copyQ();
         std::sort(tlist.begin(),tlist.end(),[](const task* a, const task* b){ return a->at < b->at; });
         for(auto const& t:tlist) H4_Pirntf("%s\n",dumpTask(t,0).data()); // faze=quiescent
@@ -225,7 +225,7 @@ void task::requeue(){
 	h4.qt(this);
 }
 
-void task::schedule(){ at=(uint32_t) millis() + randomRange(rmin,rmax); }
+void task::schedule(){ at= (uint64_t) millis() + randomRange(rmin,rmax); }
 
 void task::createPartial(void* d,size_t l){
 	partial=malloc(l);
@@ -297,8 +297,37 @@ bool H4::_unHook(uint32_t subid){
     return false;
 }
 
+
+void H4::rolloverFix()
+{
+    H4_Pirntf("Fixing rollover\n");
+    std::vector<task*> tasks;
+    HAL_disableInterrupts(); // why?
+    while (!empty()){
+        tasks.emplace_back(top());
+        pop();
+    }
+    for (auto &t:tasks){
+        if (t->at>UINT32_MAX)
+            t->at-=UINT32_MAX;
+        
+        push(t);
+    }
+    HAL_enableInterrupts();
+    scheduleRollover();
+    // dumpQ();
+}
+void H4::scheduleRollover()
+{
+    H4_Pirntf("Scheduling Rollover\n");
+    h4.once(H4_SAFETY_TIME + 500, []()
+            { h4.once(UINT32_MAX - millis() - H4_SAFETY_TIME, []()
+                      { h4.rolloverFix(); }); });
+}
+
 void setup(){
     h4StartPlugins();
+    h4.setup();
     h4setup();
 }        
 
@@ -345,13 +374,16 @@ H4_TASK_PTR H4::repeatWhileEver(H4_FN_COUNT fncd,uint32_t msec,H4_FN_VOID fn,H4_
 			TAG(13),s);
 }
 
+void H4::setup(){
+    scheduleRollover();
+}
 
 void H4::loop(){
 	task* t=nullptr;
     uint32_t now=(uint32_t) millis(); // can't do inside loop...clocks dont work when HAL_disableInterrupts()!!!
 	HAL_disableInterrupts();
 	if(size()){
-        if(((int)(top()->at -  now)) < 1) {
+        if(((int64_t)(top()->at - now)) < 1) {
             t=top();
             pop();
         }
