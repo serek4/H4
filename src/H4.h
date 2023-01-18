@@ -46,6 +46,10 @@ For example, other rights such as publicity, privacy, or moral rights may limit 
 
 #define H4_DEBUG          0
 
+#define H4_SAFETY_TIME  200 // ms, the time space where h4 could fix rollover issue, 
+                            // too long might let more functions called earler if these falls just between millis() rollover and this period, just after the rollover, 
+                            // too tight might cause missing it (if the h4.loop() didn't take control at the short period)
+
 #if H4_DEBUG
 #define H4_Pirntf(f_, ...)    Serial.printf((f_), ##__VA_ARGS__)
 #else
@@ -129,7 +133,7 @@ class task{
             bool 			singleton=false;
             H4_FN_VOID      lastRites=[]{};
             size_t			len=0;
-            uint32_t        at;
+            uint64_t        at;
             uint32_t		nrq=0;
             void*			partial=NULL;
 
@@ -213,6 +217,9 @@ class H4: public std::priority_queue<task*, std::vector<task*>, task>{ // H4P 35
                 std::vector<task*>   _copyQ();
                 void            _hookLoop(H4_FN_VOID f,uint32_t subid);
                 bool            _unHook(uint32_t token);
+
+                void            rolloverFix(); // CALLABLE ONLY ON THE EDGE OF MILLIS ROLLOVER
+                void            scheduleRollover();
 
 //	protected:
                 uint32_t 		gpFramed(task* t,std::function<uint32_t()> f);
