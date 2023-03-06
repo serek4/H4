@@ -8,7 +8,7 @@ Licence: ![licence](https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png) Crea
 
 ---
 
-## Version 4.0.2 06/03/2023
+## Version 4.0.3 06/03/2023
 
 Fix scheduling beyond UINT32_MAX value, support millis rollover by defining millis64() function.
 
