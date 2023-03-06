@@ -8,12 +8,19 @@ Licence: ![licence](https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png) Crea
 
 ---
 
+## Version 4.0.2 06/03/2023
+
+Fix scheduling beyond UINT32_MAX value, support millis rollover by defining millis64() function.
+
+---
+
 ## Version 4.0.0 12/10/2021
 
 License changed to Creative Commons: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
 
 ---
 
+R.I.P Phil :\ :
 ## If you are able, please [Support me on Patreon](https://patreon.com/esparto) or [PayPal](https://www.paypal.com/paypalme/h4plugins) and/or subscribe to my [Youtube channel (instructional videos)](https://www.youtube.com/channel/UCYi-Ko76_3p9hBUtleZRY6g)
 
 ---

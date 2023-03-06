@@ -32,12 +32,12 @@ For example, other rights such as publicity, privacy, or moral rights may limit 
 #include <H4.h>
 
 #ifdef ARDUINO_ARCH_ESP32
-    portMUX_TYPE h4_mutex = portMUX_INITIALIZER_UNLOCKED;
-    void HAL_enableInterrupts(){ portEXIT_CRITICAL(&h4_mutex); }
-    void HAL_disableInterrupts(){ portENTER_CRITICAL(&h4_mutex); }
+	portMUX_TYPE h4_mutex = portMUX_INITIALIZER_UNLOCKED;
+	void HAL_enableInterrupts(){ portEXIT_CRITICAL(&h4_mutex); }
+	void HAL_disableInterrupts(){ portENTER_CRITICAL(&h4_mutex); }
 #else
-    void HAL_enableInterrupts(){ interrupts(); }
-    void HAL_disableInterrupts(){ noInterrupts();}
+	void HAL_enableInterrupts(){ interrupts(); }
+	void HAL_disableInterrupts(){ noInterrupts();}
 #endif
 //
 //      and ...here we go!
@@ -62,25 +62,25 @@ uint32_t h4Nloops=0;
 #endif
 
 #if H4_HOOK_TASKS
-    H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ H4_Pirntf("%s\n",dumpTask(t,faze).data());  };
+	H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ H4_Pirntf("%s\n",dumpTask(t,faze).data());  };
 //    H4_FN_TASK H4::taskHook=[](task* t,uint32_t faze=0){ };
 
-    H4_INT_MAP taskTypes={
-        {1,"link"},
-        {3,"evry"}, // 3
-        {4,"evrn"}, // 4
-        {5,"ntim"}, // 5
-        {6,"ntrn"}, // 6
-        {7,"once"}, // 7
-        {8,"1xrn"}, // 8
-        {9,"qfun"}, // 9
-        {10,"rntx"}, // 10
-        {11,"rnrn"}, // 11
-        {12,"rptw"}, // 12
-        {13,"rpwe"},
-        {14,"work"}
-    };
-    const char* taskPhase[]={"IDL","NEW","SCH","OOQ","DIE"};
+	H4_INT_MAP taskTypes={
+		{1,"link"},
+		{3,"evry"}, // 3
+		{4,"evrn"}, // 4
+		{5,"ntim"}, // 5
+		{6,"ntrn"}, // 6
+		{7,"once"}, // 7
+		{8,"1xrn"}, // 8
+		{9,"qfun"}, // 9
+		{10,"rntx"}, // 10
+		{11,"rnrn"}, // 11
+		{12,"rptw"}, // 12
+		{13,"rpwe"},
+		{14,"work"}
+	};
+	const char* taskPhase[]={"IDL","NEW","SCH","OOQ","DIE"};
 
 void H4::addTaskNames(H4_INT_MAP names){ h4TaskNames.insert(names.begin(),names.end()); }
 std::string H4::getTaskType(uint32_t e){ return taskTypes.count(e) ? taskTypes[e]:("????"); }
@@ -88,41 +88,66 @@ const char* H4::getTaskName(uint32_t id){ return h4TaskNames.count(id) ? h4TaskN
 
 std::string H4::dumpTask(task* t,uint32_t faze){
 //    H4_Pirntf("H4::dumpTask 0x%08x Phase %d\n",t,faze);
-    char buf[1024];
-    snprintf(buf, 1023, "T=%08u %s: Q=%02d 0x%08x %s/%s %s %10llu(T%+11llu) %10u %10u %10u L=%d",
-             millis(),
-             taskPhase[faze],
-             h4.size(),
-             (void *)t,
-             //        (void*) t->parent,
-             getTaskType(t->uid / 100).data(),
-             getTaskName(t->uid % 100),
-             t->singleton ? "S" : " ",
-             t->at,
-             t->at > millis() ? (uint64_t)((uint64_t)t->at - millis()) : (uint64_t)(millis() - t->at),
-             t->rmin,
-             t->rmax,
-             t->nrq,
-             t->len
-             //        t->userStore.size()
-    );
+	char buf[1024];
+	snprintf(buf, 1023, "T=%08u %s: Q=%02d 0x%08x %s/%s %s %10llu(T%+11llu) %10u %10u %10u L=%d",
+			 millis(),
+			 taskPhase[faze],
+			 h4.size(),
+			 (void *)t,
+			 //        (void*) t->parent,
+			 getTaskType(t->uid / 100).data(),
+			 getTaskName(t->uid % 100),
+			 t->singleton ? "S" : " ",
+			 t->at,
+			 t->at > millis() ? (uint64_t)((uint64_t)t->at - millis()) : (uint64_t)(millis() - t->at),
+			 t->rmin,
+			 t->rmax,
+			 t->nrq,
+			 t->len
+			 //        t->userStore.size()
+	);
 
-    return std::string(buf);
+	return std::string(buf);
 }
 
 void H4::dumpQ(){
-    if(h4.size()){
-	    H4_Pirntf("           ACT   nQ    Handle   Type/name    Due @tick(T+          )        Min        Max        nRQ Len\n"); 
-        std::vector<task*> tlist=h4._copyQ();
-        std::sort(tlist.begin(),tlist.end(),[](const task* a, const task* b){ return a->at < b->at; });
-        for(auto const& t:tlist) H4_Pirntf("%s\n",dumpTask(t,0).data()); // faze=quiescent
-        H4_Pirntf("\n");
-    } else H4_Pirntf("QUEUE EMPTY\n");
+	if(h4.size()){
+		H4_Pirntf("           ACT   nQ    Handle   Type/name    Due @tick(T+          )        Min        Max        nRQ Len\n"); 
+		std::vector<task*> tlist=h4._copyQ();
+		std::sort(tlist.begin(),tlist.end(),[](const task* a, const task* b){ return a->at < b->at; });
+		for(auto const& t:tlist) H4_Pirntf("%s\n",dumpTask(t,0).data()); // faze=quiescent
+		H4_Pirntf("\n");
+	} else H4_Pirntf("QUEUE EMPTY\n");
 }
 #else
 void H4::dumpQ(){}
 #endif
 
+uint64_t millis64(){
+	static volatile uint64_t overflow        = 0;
+	static volatile uint32_t lastSample         = 0;
+	static volatile uint8_t lock             = 0;
+	static const uint64_t kOverflowIncrement = static_cast<uint64_t>(0x100000000);
+
+	uint64_t overflowSample;
+	uint32_t sample;
+
+	// Tracking timer wrap assumes that this function gets called with
+	// a period that is less than 1/2 the timer range.
+	HAL_disableInterrupts();
+	sample = millis();
+
+	if (lastSample > sample)
+	{
+		overflow += kOverflowIncrement;
+	}
+
+	lastSample     = sample;
+	overflowSample = overflow;
+	HAL_enableInterrupts();
+
+	return (overflowSample | static_cast<uint64_t>(sample));
+}
 //
 //		task
 //
@@ -143,7 +168,7 @@ task::task(
   uid{_u},
   singleton{_s}
 {
-    if(_s){
+	if(_s){
 		uint32_t id=_u%100;
 		if(singles.count(id)) singles[id]->endK();    
 		singles[id]=this;
@@ -158,15 +183,15 @@ void task::operator()(){
 	else {
 		f();
 		if(reaper){ // it's finite
-		    if(!(reaper())){ // ...and it just ended
-                _chain(); // run chain function if there is one
-                if((rmin==rmax) && rmin){
-                    rmin=86400000; // reque in +24 hrs
-                    rmax=0;
-                    reaper=nullptr; // and every day after
-                    requeue();
-                } else _destruct();
-		    } else requeue();
+			if(!(reaper())){ // ...and it just ended
+				_chain(); // run chain function if there is one
+				if((rmin==rmax) && rmin){
+					rmin=86400000; // reque in +24 hrs
+					rmax=0;
+					reaper=nullptr; // and every day after
+					requeue();
+				} else _destruct();
+			} else requeue();
 		} else requeue();
 	}
 }
@@ -185,11 +210,11 @@ uint32_t task::cleardown(uint32_t pass){
 
 void task::_destruct(){ 
 #if H4_HOOK_TASKS
-    H4::taskHook(this,4);
+	H4::taskHook(this,4);
 #endif
-    lastRites();
+	lastRites();
 	if(partial) free(partial);
-    delete this;
+	delete this;
 }
 //		The many ways to die... :)
 uint32_t task::endF(){
@@ -225,12 +250,16 @@ void task::requeue(){
 	h4.qt(this);
 }
 
+#if USE_MILLIS_64
+void task::schedule(){ at= millis64() + randomRange(rmin,rmax); }
+#else
 void task::schedule(){ at= (uint64_t) millis() + randomRange(rmin,rmax); }
+#endif
 
 void task::createPartial(void* d,size_t l){
 	partial=malloc(l);
 	memcpy(partial,d,l);
-    len = l;
+	len = l;
 }
 //
 //      H4
@@ -238,7 +267,7 @@ void task::createPartial(void* d,size_t l){
 task* H4::add(H4_FN_VOID _f,uint32_t _m,uint32_t _x,H4_FN_COUNT _r,H4_FN_VOID _c,uint32_t _u,bool _s){
 	task* t=new task(_f,_m,_x,_r,_c,_u,_s);
 #if H4_HOOK_TASKS
-    H4::taskHook(t,1);
+	H4::taskHook(t,1);
 #endif
 	qt(t);
 	return t;
@@ -267,82 +296,83 @@ void H4::qt(task* t){
 	push(t);
 	HAL_enableInterrupts();
 #if H4_HOOK_TASKS
-    H4::taskHook(t,2);
+	H4::taskHook(t,2);
 #endif
 }
 //
 extern  void h4setup();
 
 std::vector<task*> H4::_copyQ(){
-    std::vector<task*> t;
-    HAL_disableInterrupts();
-    t=c;
-    HAL_enableInterrupts();
-    return t;
+	std::vector<task*> t;
+	HAL_disableInterrupts();
+	t=c;
+	HAL_enableInterrupts();
+	return t;
 }
 
 void H4::_hookLoop(H4_FN_VOID f,uint32_t subid){
-    if(f) {
-        unloadables[subid]=loopChain.size();
-        loopChain.push_back(f);
-    }
+	if(f) {
+		unloadables[subid]=loopChain.size();
+		loopChain.push_back(f);
+	}
 }
 
 bool H4::_unHook(uint32_t subid){
-    if(unloadables.count(subid)){
-        loopChain.erase(loopChain.begin()+unloadables[subid]);
-        unloadables.erase(subid);
-        return true;
-    }
-    return false;
+	if(unloadables.count(subid)){
+		loopChain.erase(loopChain.begin()+unloadables[subid]);
+		unloadables.erase(subid);
+		return true;
+	}
+	return false;
 }
 
-
+#if !USE_MILLIS_64
 void H4::rolloverFix()
 {
-    H4_Pirntf("Fixing rollover\n");
-    std::vector<task*> tasks;
-    HAL_disableInterrupts(); // why?
-    while (!empty()){
-        tasks.emplace_back(top());
-        pop();
-    }
-    for (auto &t:tasks){
-        if (t->at>UINT32_MAX)
-            t->at-=UINT32_MAX;
-        
-        push(t);
-    }
-    HAL_enableInterrupts();
-    scheduleRollover();
-    // dumpQ();
+	H4_Pirntf("Fixing rollover\n");
+	std::vector<task*> tasks;
+	HAL_disableInterrupts(); // why?
+	while (!empty()){
+		tasks.emplace_back(top());
+		pop();
+	}
+	for (auto &t:tasks){
+		if (t->at>UINT32_MAX)
+			t->at-=UINT32_MAX;
+		
+		push(t);
+	}
+	HAL_enableInterrupts();
+	scheduleRollover();
+	// dumpQ();
 }
 void H4::scheduleRollover()
 {
-    H4_Pirntf("Scheduling Rollover\n");
-    h4.once(H4_SAFETY_TIME + 500, []()
-            { h4.once(UINT32_MAX - millis() - H4_SAFETY_TIME, []()
-                      { h4.rolloverFix(); }); });
+	H4_Pirntf("Scheduling Rollover\n");
+	h4.once(H4_SAFETY_TIME + 500, []()
+			{ h4.once(UINT32_MAX - millis() - H4_SAFETY_TIME, []()
+					  { h4.rolloverFix(); }); });
 }
+#endif
 
 void setup(){
-    h4StartPlugins();
-    h4.setup();
-    h4setup();
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
 }        
 
 void loop(){ 
-    h4.loop();
+	h4.loop();
 }
 
 void H4::cancelAll(H4_FN_VOID f){
-    HAL_disableInterrupts();
-    while(!empty()){
-        top()->endK();
-        pop();
-    }
-    HAL_enableInterrupts();
-    if(f) f();
+	HAL_disableInterrupts();
+	while(!empty()){
+		top()->endK();
+		pop();
+	}
+	HAL_enableInterrupts();
+	if(f) f();
 }
 
 H4_TASK_PTR H4::every(uint32_t msec,H4_FN_VOID fn,H4_FN_VOID fnc,uint32_t u,bool s){ return add(fn,msec,0,nullptr,fnc,TAG(3),s); }
@@ -375,33 +405,35 @@ H4_TASK_PTR H4::repeatWhileEver(H4_FN_COUNT fncd,uint32_t msec,H4_FN_VOID fn,H4_
 }
 
 void H4::setup(){
-    scheduleRollover();
+#if !USE_MILLIS_64
+	scheduleRollover();
+#endif
 }
 
 void H4::loop(){
 	task* t=nullptr;
-    uint32_t now=(uint32_t) millis(); // can't do inside loop...clocks dont work when HAL_disableInterrupts()!!!
+	uint32_t now=(uint32_t) millis(); // can't do inside loop...clocks dont work when HAL_disableInterrupts()!!!
 	HAL_disableInterrupts();
 	if(size()){
-        if(((int64_t)(top()->at - now)) < 1) {
-            t=top();
-            pop();
-        }
+		if(((int64_t)(top()->at - now)) < 1) {
+			t=top();
+			pop();
+		}
 	}
 	HAL_enableInterrupts();
 	if(t){ // H4P 35000 35100
-        H4::context=t;
+		H4::context=t;
 //        H4_Pirntf("T=%u H4context <-- %p\n",millis(),t);
-        (*t)();
+		(*t)();
 //        H4_Pirntf("T=%u H4context --> %p\n",millis(),t);
 //        dumpQ();
-    };
+	};
 //
-    for(auto const f:loopChain) f();
+	for(auto const f:loopChain) f();
 #if H4_USERLOOP
-    h4UserLoop();
+	h4UserLoop();
 #endif
 #if H4_COUNT_LOOPS
-    h4Nloops++;
+	h4Nloops++;
 #endif
 }

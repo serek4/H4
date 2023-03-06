@@ -56,6 +56,8 @@ For example, other rights such as publicity, privacy, or moral rights may limit 
 #define H4_Pirntf(f_, ...)
 #endif
 
+#define USE_MILLIS_64   1
+
 enum {
     H4_CHUNKER_ID=90,
     H4AT_SCAVENGER_ID,
@@ -74,6 +76,8 @@ void h4reboot();
 
 void HAL_enableInterrupts();
 void HAL_disableInterrupts();
+
+uint64_t millis64();
 
 #include<string>
 #include<vector>
@@ -218,8 +222,10 @@ class H4: public std::priority_queue<task*, std::vector<task*>, task>{ // H4P 35
                 void            _hookLoop(H4_FN_VOID f,uint32_t subid);
                 bool            _unHook(uint32_t token);
 
+#if !USE_MILLIS_64
                 void            rolloverFix(); // CALLABLE ONLY ON THE EDGE OF MILLIS ROLLOVER
                 void            scheduleRollover();
+#endif
 
 //	protected:
                 uint32_t 		gpFramed(task* t,std::function<uint32_t()> f);
