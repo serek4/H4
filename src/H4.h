@@ -69,7 +69,11 @@ enum {
 
 #include <Arduino.h>
 
-#define h4rebootCore ESP.restart 
+#if defined(ARDUINO_ARCH_RP2040)
+	#define h4rebootCore rp2040.reboot
+#else // ESP32/ESP8266
+	#define h4rebootCore ESP.restart 
+#endif
 #define H4_BOARD ARDUINO_BOARD
 
 void h4reboot();
