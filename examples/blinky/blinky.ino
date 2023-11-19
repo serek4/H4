@@ -41,3 +41,13 @@ void h4setup(){ // do the same type of thing as the standard setup
     pinMode(LED_BUILTIN,OUTPUT);
     h4.every(1000,myCallback); // All times are milliseconds, 1000=1 second
 }
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

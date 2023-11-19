@@ -50,3 +50,13 @@ void h4setup(){ // do the same type of thing as the standard setup
     h4.every(2000,[](){ myCallback(LED2); }); // All times are milliseconds, 1000=1 second
     h4.every(3000,[](){ myCallback(LED3); }); // All times are milliseconds, 1000=1 second
 }
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

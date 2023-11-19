@@ -355,16 +355,6 @@ void H4::scheduleRollover()
 }
 #endif
 
-void setup(){
-	h4StartPlugins();
-	h4.setup();
-	h4setup();
-}        
-
-void loop(){ 
-	h4.loop();
-}
-
 void H4::cancelAll(H4_FN_VOID f){
 	HAL_disableInterrupts();
 	while(!empty()){

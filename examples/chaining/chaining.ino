@@ -85,3 +85,13 @@ It's easy as: 123
 have a listen to the real thing: https://www.youtube.com/watch?v=ho7796-au8U
 
  */
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

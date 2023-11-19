@@ -154,3 +154,13 @@ C will finish
 C on iteration #20
 C (if asked) will only finish after 15 iterations
 */
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

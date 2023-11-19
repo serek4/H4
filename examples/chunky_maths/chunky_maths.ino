@@ -83,3 +83,13 @@ void h4setup(){
     // reserve space for struct
     p->createPartial(&mydata, sizeof(struct S));
 }
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

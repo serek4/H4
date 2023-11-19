@@ -89,3 +89,12 @@ Tick
 Tick
 
  */
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}

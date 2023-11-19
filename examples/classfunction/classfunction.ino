@@ -60,3 +60,13 @@ void h4setup() {
     [](){ simpleSimon.says("It's never a bind!"); }  
     );
 }
+
+void setup(){
+	h4StartPlugins();
+	h4.setup();
+	h4setup();
+}
+
+void loop(){ 
+	h4.loop();
+}
